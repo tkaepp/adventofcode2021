@@ -29,10 +29,15 @@ fn main() {
 
     print_dashes();
 
-    println!("Day 3 with the sample data");
+    println!("Day 3-1 with the sample data");
     print_dashes();
-    day3::solve_part_one(day3::day3_sample(), 5);
-    day3::solve_part_one(day3::day3(), "111101110001".len().try_into().unwrap());
+    day3::powerconsumption(day3::day3_sample(), 5);
+    day3::powerconsumption(day3::day3(), "111101110001".len().try_into().unwrap());
+
+    println!("Day 3-2 with the sample data");
+    print_dashes();
+    day3::life_support_rating(day3::day3_sample(), 5);
+    day3::life_support_rating(day3::day3(), "111101110001".len().try_into().unwrap());
 }
 
 fn print_dashes() {

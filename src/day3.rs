@@ -1,21 +1,94 @@
 #[cfg(test)]
 #[test]
-fn sample() {
-    assert_eq!(solve_part_one(day3_sample(), 5), 198)
-}
-#[test]
-fn real() {
-    assert_eq!(solve_part_one(day3(), 12), 3813416)
+fn powerconsumption_test() {
+    assert_eq!(powerconsumption(day3_sample(), 5), 198);
+    assert_eq!(powerconsumption(day3(), 12), 3813416);
 }
 
-pub(crate) fn solve_part_one(values: Vec<i32>, len: i32) -> i32 {
+#[test]
+fn life_support_rating_test_sample() {
+    assert_eq!(oxygen_generator_rating(&day3_sample(), 5), 23);
+    assert_eq!(co2_scrubber_rating(&day3_sample(), 5), 10);
+    assert_eq!(life_support_rating(day3_sample(), 5), 230);
+}
+
+#[test]
+fn life_support_rating_test() {
+    assert_eq!(life_support_rating(day3(), 12), 2990784);
+}
+
+pub(crate) fn powerconsumption(values: Vec<i32>, len: i32) -> i32 {
     let gamma = iterate_values(calculate_most_common_bit, &values, len, 1);
     let epsilon = iterate_values(calculate_most_common_bit, &values, len, 0);
 
-    let result = gamma * epsilon;
+    let powerconsumption = gamma * epsilon;
 
-    println!("Gamma {} * epsilon {}: {}", gamma, epsilon, result);
-    result
+    println!(
+        "Gamma {} * epsilon {}: {}",
+        gamma, epsilon, powerconsumption
+    );
+    powerconsumption
+}
+
+fn co2_scrubber_rating(values: &Vec<i32>, len: i32) -> i32 {
+    fn slice_values(error_codes: &Vec<i32>, mask: i32) -> Vec<i32> {
+        let least_common_bit = calculate_least_common_bit(&error_codes, mask);
+        // if mostcommont is 1 then it really is 0 and we should use 0. filter out those
+        let slice: Vec<i32> = error_codes
+            .into_iter()
+            .filter(|&x| match least_common_bit != 0 {
+                false => x & mask == 0,
+                true => x & mask > 0,
+            })
+            .cloned()
+            .collect();
+
+        let rec_values = match slice.len() {
+            1 => slice,
+            _ => slice_values(&slice, mask >> 1),
+        };
+
+        rec_values
+    }
+
+    let rating_value = slice_values(&values, 1 << len - 1);
+
+    *rating_value.first().unwrap()
+}
+
+fn oxygen_generator_rating(values: &Vec<i32>, len: i32) -> i32 {
+    fn slice_values(error_codes: &Vec<i32>, mask: i32) -> Vec<i32> {
+        let most_common_bit = calculate_most_common_bit(&error_codes, mask);
+        let slice: Vec<i32> = error_codes
+            .into_iter()
+            .filter(|&x| match most_common_bit != 0 {
+                false => x & mask == 0,
+                true => x & mask > 0,
+            })
+            .cloned()
+            .collect();
+
+        let rec_values = match slice.len() {
+            1 => slice,
+            _ => slice_values(&slice, mask >> 1),
+        };
+
+        rec_values
+    }
+
+    let rating_value = slice_values(&values, 1 << len);
+
+    *rating_value.first().unwrap()
+}
+
+pub(crate) fn life_support_rating(values: Vec<i32>, len: i32) -> i32 {
+    let oxygen_generator_rating = oxygen_generator_rating(&values, len);
+    let co2_scrubber_rating = co2_scrubber_rating(&values, len);
+
+    let life_support_rating = oxygen_generator_rating * co2_scrubber_rating;
+
+    println!("Life Support Rating: {}", life_support_rating);
+    life_support_rating
 }
 
 fn iterate_values(
@@ -42,19 +115,40 @@ fn iterate_values(
     value
 }
 
-fn calculate_most_common_bit(values: &Vec<i32>, mask: i32) -> i32 {
+fn calculate_least_common_bit(values: &Vec<i32>, mask: i32) -> i32 {
     // start the mask at. 000001 then 000010
     let mut counter1 = 0;
+    let mut counter0 = 0;
 
     for value in values {
         let bit = value & mask;
         match bit {
-            0 => (),
+            0 => counter0 = counter0 + 1,
             _ => counter1 = counter1 + 1,
         }
     }
 
-    if counter1 > values.len() / 2 {
+    if counter0 <= counter1 {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+fn calculate_most_common_bit(values: &Vec<i32>, mask: i32) -> i32 {
+    // start the mask at. 000001 then 000010
+    let mut counter1 = 0;
+    let mut counter0 = 0;
+
+    for value in values {
+        let bit = value & mask;
+        match bit {
+            0 => counter0 = counter0 + 1,
+            _ => counter1 = counter1 + 1,
+        }
+    }
+
+    if counter1 >= counter0 {
         return 1;
     } else {
         return 0;
