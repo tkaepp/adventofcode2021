@@ -1,5 +1,6 @@
 mod day1;
 mod day2;
+mod day3;
 mod inputs;
 
 fn main() {
@@ -27,6 +28,11 @@ fn main() {
     day2::solve_part_two(day2::day2());
 
     print_dashes();
+
+    println!("Day 3 with the sample data");
+    print_dashes();
+    day3::solve_part_one(day3::day3_sample(), 5);
+    day3::solve_part_one(day3::day3(), "111101110001".len().try_into().unwrap());
 }
 
 fn print_dashes() {
