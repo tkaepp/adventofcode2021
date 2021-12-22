@@ -39,6 +39,16 @@ fn main() {
     print_dashes();
     day3::life_support_rating(day3::day3_sample(), 5);
     day3::life_support_rating(day3::day3(), "111101110001".len().try_into().unwrap());
+
+    println!("Day 4-1");
+    print_dashes();
+    day4::bingo(day4::sample());
+    day4::bingo(day4::real());
+
+    // println!("Day 4-1");
+    // print_dashes();
+    // day4::bingo(day4::sample());
+    // day4::bingo(day4::real());
 }
 
 fn print_dashes() {
